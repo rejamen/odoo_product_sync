@@ -2,14 +2,9 @@
 
 from odoo import models, fields, api
 
-class odoo_product_sync(models.Model):
-    _name = 'odoo.product.sync'
+class product_template(models.Model):
+    _inherit = 'product.template'
 
-    name = fields.Char()
-    value = fields.Integer()
-    value2 = fields.Float(compute="_value_pc", store=True)
-    description = fields.Text()
-
-    @api.depends('value')
-    def _value_pc(self):
-        self.value2 = float(self.value) / 100
+    sync_state = fields.Selection([
+    	('sync_need', 'Sync needed'),
+    	('synced', 'Synced')], 'Sync status')
