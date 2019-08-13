@@ -7,51 +7,18 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <!-- find field description and add the field
-                 idea_ids after it -->
-            <xpath expr="//field[@name='type']" position="after">
-              <field name="sync_state"/>
+
+            <xpath expr="//field[@name='barcode']" position="after">
+              <field name="sync_state" invisible="1"/>
             </xpath>
+
+
+            <xpath expr="//button[@name='toggle_active']" position="after">
+              <button name="action_export_product" type="action" string="Sync" class="btn oe_stat_button" icon="fa-check" attrs="{'invisible': [('sync_state', '=', 'synced')]}"/>
+            </xpath>
+
         </field>
     </record>
-    <!-- explicit list view definition -->
-    
-    <!-- <record model="ir.ui.view" id="odoo_product_sync_list">
-      <field name="name">odoo.product.sync.list</field>
-      <field name="model">odoo.product.sync</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
-      </field>
-    </record> -->
-    
-
-    <!-- actions opening views on models -->
-    
-    <!-- <record model="ir.actions.act_window" id="odoo_product_sync_action_window">
-      <field name="name">Product Sync</field>
-      <field name="res_model">odoo.product.sync</field>
-      <field name="view_mode">tree,form</field>
-    </record> -->
-    
-
-    <!-- Top menu item -->
-    
-    <!-- <menuitem name="Product Sync" id="odoo_product_sync_menu_root"/> -->
-    
-    <!-- menu categories -->
-    
-    <!-- <menuitem name="Menu 1" id="odoo_product_sync_menu_1" parent="odoo_product_sync_menu_root"/> -->
-    
-    <!-- actions -->
-    
-    <!-- <menuitem name="List" id="odoo_product_sync_menu_1_list" parent="odoo_product_sync_menu_1" action="odoo_product_sync_action_window"/> -->
-
-    <!-- <menuitem name="Products" id="odoo_product_list" parent="odoo_product_sync_menu_1" action="purchase.product_normal_action_puchased"/> -->
-
     
   </data>
 </odoo>
