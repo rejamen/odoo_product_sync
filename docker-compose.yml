@@ -1,9 +1,8 @@
-version: '2'
+version: '3.4'
 services:
   odoo:
     build: .
-#    image: odoo:12.0
-    container_name: odoo
+    container_name: odoo_product_sync_odoo
     depends_on:
       - db
     ports:
