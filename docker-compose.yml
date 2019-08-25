@@ -2,19 +2,23 @@ version: '3.4'
 services:
   odoo:
     build: .
-    container_name: odoo_product_sync_odoo
+    container_name: odoo
     depends_on:
       - db
     ports:
       - "8069:8069"
     volumes:
       - ./extra-addons:/mnt/extra-addons
-  
   db:
     image: postgres:9.5
     container_name: db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=odoo
-      - POSTGRES_USER=odoo
-      
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_USER: odoo
+      POSTGRES_DB: postgres
+volumes:
+  db-data:

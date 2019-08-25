@@ -8,45 +8,71 @@ from odoo.addons.connector.components.mapper import mapping
 import logging
 _logger = logging.getLogger(__name__)
 
+class external_connector(models.Model):
+    _name = 'external.connector'
+
+    def test_connection(self):
+        """Test connection with external source."""
+        _logger.info('Successful Connection!')
+        self.state = 'done'
+
+
+    def change_configuration(self):
+        """Allows to change connection parameters."""
+        self.state = 'draft'
+
+
+    name = fields.Char(required=True)
+    url = fields.Char(required=True)
+    username = fields.Char(required=True)
+    password = fields.Char(required=True)
+    access_token = fields.Char(required=True)
+    connector_source = fields.Selection([
+        ('magento', 'Magento'),
+        ('amazon', 'Amazon'),
+        ('ebay', 'Ebay')
+        ], 'External Source', required=True,
+        help='Specify external connector. Depends on that other options can appear.')
+    state = fields.Selection([
+        ('draft', 'Untested'),
+        ('done', 'Success'),
+        ], 'Connection status', default='draft') 
+
+
 class product_template(models.Model):
     _inherit = 'product.template'
 
     """Call create, write and unlink method to create events."""
     @api.model
     def create(self, vals):
-    	record = super(product_template, self).create(vals)
-    	self._event('on_record_create').notify(record, fields=vals.keys())
-    	return record
+        record = super(product_template, self).create(vals)
+        self._event('on_record_create').notify(record, fields=vals.keys())
+        return record
 
-    
     @api.multi
     def write(self, vals):
-    	record = super(product_template, self).write(vals)
-    	self._event('on_record_write').notify(record, fields=vals.keys())
-    	return record
+        record = super(product_template, self).write(vals)
+        self._event('on_record_write').notify(record, fields=vals.keys())
+        return record
 
-    
     @api.multi
     def unlink(self):
-    	record = super(product_template, self).unlink()
-    	self._event('on_record_unlink').notify(record)
-    	return record
+        record = super(product_template, self).unlink()
+        self._event('on_record_unlink').notify(record)
+        return record
 
-    
     @job
     @api.multi
     def export_product(self):
-    	_logger.info("Exporting data!!!!!!!!!!!")
+        _logger.info("Exporting data!!!!!!!!!!!")
 
-    
     @api.multi
     def action_export_product(self):
-    	self.with_delay().export_product()
+        self.with_delay().export_product()
 
-    
     sync_state = fields.Selection([
-    	('sync_needed', 'Sync needed'),
-    	('synced', 'Synced')], 'Sync status', default='sync_needed')
+        ('sync_needed', 'Sync needed'),
+        ('synced', 'Synced')], 'Sync status', default='sync_needed')
 
 
 class product_create_event_listener(Component):
@@ -54,15 +80,13 @@ class product_create_event_listener(Component):
     _inherit = 'base.event.listener'
     _apply_on = ['product.template']
 
-    
     def on_record_create(self, record, fields=None):
         _logger.info("%r has been created!!!!!!!", record)
         self.map_name(record)
-        
 
     @mapping
     def map_name(self, record):
-        return {'name': record.name} 
+        return {'name': record.name}
 
 
 class product_write_event_listener(Component):
@@ -105,5 +129,5 @@ class ExternalSourceProduct(models.Model):
         required=True,
         ondelete='restrict',
     )
-    external_id = fields.Integer(string='ID in the External Source', index=True)
-
+    external_id = fields.Integer(
+        string='ID in the External Source', index=True)
