@@ -2,8 +2,8 @@
   <data>
 
     <!-- external connectors list view -->
-    <record model="ir.ui.view" id="external_connector_tree_view">
-      <field name="name">external.connector.tree.view</field>
+    <record  id="external_connector_view_tree" model="ir.ui.view">
+      <field name="name">external.connector.view.tree</field>
       <field name="model">external.connector</field>
       <field name="arch" type="xml">
         <tree string="Connector Tree" decoration-danger="state=='draft'" decoration-success="state=='done'">
@@ -17,16 +17,16 @@
     </record>
 
     <!-- external connector form view -->
-    <record model="ir.ui.view" id="external_connector_form_view">
-      <field name="name">external.connector.form</field>
+    <record id="external_connector_view_form" model="ir.ui.view" >
+      <field name="name">external.connector.view.form</field>
       <field name="model">external.connector</field>
       <field name="arch" type="xml">
         <form string="Connector Form">
-          
+
           <header>
               <field name="state" widget="statusbar"/>
           </header>
-          
+
           <sheet>
             <div class="o_not_full oe_button_box">
               <button name="test_connection" type="object" string="Test connection"
@@ -38,7 +38,7 @@
 
             <label for="name" string="Connector name"/>
             <h1><field name="name" attrs="{'readonly': [('state','=', 'done')]}"/></h1>
-            
+
             <group>
               <group string="General information">
                 <field name="url" string="URL" attrs="{'readonly': [('state','=', 'done')]}"/>
@@ -59,7 +59,7 @@
 
 
     <!-- action for external connectors instances -->
-    <record model="ir.actions.act_window" id="action_external_connector_list">
+    <record id="external_connector_action" model="ir.actions.act_window">
       <field name="name">Connector instances</field>
       <field name="res_model">external.connector</field>
       <field name="view_mode">tree,form</field>
@@ -68,15 +68,15 @@
         </p>
       </field>
     </record>
-    
+
     <!-- top level menu -->
     <!-- no needed, it is embedded into  connector module top menu -->
-        
+
     <!-- first level menu -->
     <menuitem id="external_connector_menu" name="Configuration" parent="connector.menu_connector"/>
 
     <!-- categories menu -->
-    <menuitem id="connector_istances_menu" name="External Connectors" parent="external_connector_menu" action="action_external_connector_list"/>
+    <menuitem id="external_connector_menu_list_instances" name="External Connectors" parent="external_connector_menu" action="external_connector_action"/>
 
 
   </data>

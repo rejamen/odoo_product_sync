@@ -2,13 +2,14 @@
 
 from odoo import models, fields, api
 from odoo.addons.component.core import Component
-from odoo.addons.queue_job.job import job
 from odoo.addons.connector.components.mapper import mapping
+from odoo.addons.queue_job.job import job
+
 
 import logging
 _logger = logging.getLogger(__name__)
 
-class external_connector(models.Model):
+class ExternalConnector(models.Model):
     _name = 'external.connector'
 
     def test_connection(self):
@@ -36,4 +37,4 @@ class external_connector(models.Model):
     state = fields.Selection([
         ('draft', 'Untested'),
         ('done', 'Success'),
-        ], 'Connection status', default='draft') 
+        ], 'Connection status', default='draft')
