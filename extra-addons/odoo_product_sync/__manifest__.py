@@ -11,11 +11,11 @@
         If the product changes in Odoo it is synchronised to the external system.
 
         2.  external system -> odoo
-        If the product changes in the external system it is possible to get 
-        these changes. 
+        If the product changes in the external system it is possible to get
+        these changes.
 
-        In product detail view it has been added a widget (after Archive button) to show the synchronisation 
-        state. If the external product data is different than the Odoo product data 
+        In product detail view it has been added a widget (after Archive button) to show the synchronisation
+        state. If the external product data is different than the Odoo product data
         it shows “Sync”, otherwise it hides.
     """,
 
@@ -33,7 +33,7 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
-        'views/external_connector.xml',
+        'views/external_backend.xml',
         'views/product_template.xml',
         'views/templates.xml',
     ],
