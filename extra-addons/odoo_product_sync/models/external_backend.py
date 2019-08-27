@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields
+from odoo import api, models, fields
+from odoo.exceptions import UserError
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -15,16 +16,43 @@ class ExternalBackend(models.Model):
     _inherit = 'connector.backend'
     _description = 'External Service to sync'
 
+    @api.multi
     def test_connection(self):
         """Test connection with external source."""
-        # TODO
-        _logger.info('Successful Connection!')
-        self.state = 'done'
+        for record in self:
+            url = record.url
+            username = record.username
+            password = record.password
+            access_token = record.access_token
 
+            access = self.backend_api(url, username, password, access_token)
+            if access:
+                _logger.info('Successful Connection!!!')
+                record.update({
+                    'state': 'done',
+                })
+            else:
+                _logger.error('Error in Connection!!!')
+                raise UserError('Connection Error.')
+
+    def backend_api(self, url, username, password, token):
+        """Access logic to external API.
+
+            It depends on the external service. Basically use
+            access credentials to access to the external API.
+            Return 'True' if success, else 'False'.
+        """
+        success = False
+        # Do access logic and set success False if error
+        return success
+
+    @api.multi
     def change_configuration(self):
         """Allows to change connection parameters."""
-        self.state = 'draft'
+        for record in self:
+            record.update({'state': 'draft'})
 
+    @api.multi
     def import_product(self, external_id):
         """Import product from external source."""
         with self.work_on(model_name='external.product.product') as work:
@@ -39,13 +67,15 @@ class ExternalBackend(models.Model):
     username = fields.Char(required=True)
     password = fields.Char(required=True)
     access_token = fields.Char(required=True)
-    connector_source = fields.Selection([
-        ('magento', 'Magento'),
-        ('amazon', 'Amazon'),
-        ('ebay', 'Ebay')
+    connector_source = fields.Selection(
+        [
+            ('magento', 'Magento'),
+            ('amazon', 'Amazon'),
+            ('ebay', 'Ebay'),
         ], 'External Source', required=True,
-        help='Specify external connector. Depends on that other options can appear.')
-    state = fields.Selection([
-        ('draft', 'Untested'),
-        ('done', 'Success'),
+        help='Specify external connector source.')
+    state = fields.Selection(
+        [
+            ('draft', 'Untested'),
+            ('done', 'Success'),
         ], 'Connection status', default='draft')

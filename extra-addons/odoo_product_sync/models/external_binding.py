@@ -9,29 +9,10 @@ from odoo.addons.connector.components.mapper import mapping
 from odoo.addons.queue_job.job import job, related_action
 
 
-class ConnectorBinding(models.AbstractModel):
-    """Abstract Model for Bindings in the connector.
-
-    All models used as binding between odoo and external source
-    should _inherit it.
-    """
-    _name = 'connector.binding'
-    _description = 'Connector Binding (Abstract)'
-    _inherit = 'external.binding'
-
-    # odoo_id field will be declared in concrete model
-    backend_id = fields.Many2one(
-        comodel_name='external.backend',
-        string='External Backend',
-        required=True,
-        ondelete='restrict')
-    external_id = fields.Char('ID in external source')
-
-
 class ExternalProductProduct(models.Model):
-    """Binding between Odoo model (product.product) and external record.
+    """Binding between Odoo model and external record.
 
-    Model name will change for more descriptive one in future
+    Model name could change for more descriptive one in future
     implementations, like magento.product.product, or
     ebay.product.product.
     """
@@ -45,10 +26,16 @@ class ExternalProductProduct(models.Model):
         string='Product',
         required=True,
         ondelete='cascade')
+    backend_id = fields.Many2one(
+        comodel_name='external.backend',
+        string='External Backend',
+        required=True,
+        ondelete='cascade')
+    external_id = fields.Char('ID in external source')
     sync_date = fields.Date('Sync date', help='Last date of synchronization.')
     # add fields of Products in the external source.
     created_at = fields.Date('Created at (on External source)')
-    updated_at = fields.Date('Created at (on External source)')
+    updated_at = fields.Date('Updated at (on External source)')
     product_type = fields.Selection([
         ('simple', 'Simple Product'),
         ('virtual', 'Virtual Product'),
@@ -60,10 +47,26 @@ class ExternalProductProduct(models.Model):
     @job
     @related_action(action='related_action_unwrap_binding')
     @api.multi
-    def export_products(self, fields=None):
-        """Export products .
-        TODO
-        """
+    def export_record(self):
+        self.ensure_one()
+        with self.backend_id.work_on(self._name) as work:
+            exporter = work.component(usage='record.exporter')
+            return exporter.tun(self)
+
+
+class ExternalProductListener(Component):
+    """Listener for Binding model."""
+    _name = 'external.product.listener'
+    _inherit = 'base.event.listener'
+    _apply_on = 'external.product.product'
+
+    def on_record_create(self, record, fields=None):
+        # enqueue with delay
+        record.with_delay().export_record()
+
+    def on_record_write(self, record, fields=None):
+        # enqueue with delay
+        record.with_delay().export_record()
 
 
 class ExternalProductAdapter(Component):
@@ -155,6 +158,21 @@ class ProductImportMapper(Component):
 
 
 class ProductImporter(Component):
+    """Import the external source Products.
+
+    For every record in external source a delayd job is created.
+    """
     _name = 'external.product.importer'
     _inherit = 'generic.importer'
     _apply_on = ['external.product.product']
+
+    def run(self, filters=None):
+        """Run the synchronization."""
+        from_date = filters.pop('from_date', None)
+        to_date = filters.pop('to_date', None)
+        record_ids = self.backend_adapter.search(
+            filters,
+            from_date=from_date,
+            to_date=to_date)
+        for record_id in record_ids:
+            self._import_record(record_id)
