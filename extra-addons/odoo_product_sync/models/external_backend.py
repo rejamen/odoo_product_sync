@@ -42,7 +42,7 @@ class ExternalBackend(models.Model):
             access credentials to access to the external API.
             Return 'True' if success, else 'False'.
         """
-        success = False
+        success = True
         # Do access logic and set success False if error
         return success
 

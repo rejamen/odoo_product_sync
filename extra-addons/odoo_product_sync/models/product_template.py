@@ -50,7 +50,7 @@ class ProductTemplateEventListener(Component):
 
     def on_record_create(self, record, fields=None):
         """Listening to event on record create."""
-        _logger.info('{} has been created!!!'.format(record))
+        _logger.info('{} has been created!!!'.format(record.name))
 
     def on_record_write(self, record, fields=None):
         """Listening to event on record write."""

@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from . import test_string_len
+from . import common
+from . import test_import_product
